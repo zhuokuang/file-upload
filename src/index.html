@@ -13,8 +13,9 @@
 
 <body>
 	<div id="root">
-		<input type="file" onchange="changeUploadFile(this.files[0])">
+		<input id="upload-input" type="file" onchange="changeUploadFile(this.files[0])">
 		<button onclick="upload()">upload</button>
+		<button onclick="pause()">Pause</button>
 	</div>
 
 </body>

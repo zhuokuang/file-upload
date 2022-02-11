@@ -52,6 +52,9 @@ const upload = (req, res) => {
     // 扩展名
     const ext = filename.split(".").pop();
 
+    console.log("hash:", hash);
+    console.log("size:", chunk.size);
+
     // 目录不存在在创建目录
     if (!fse.existsSync(TEMPDIR)) {
       await fse.mkdirs(TEMPDIR);
