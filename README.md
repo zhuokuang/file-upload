@@ -14,6 +14,22 @@
 
 - `stream` 合并切片文件
 
+### start
+
+1. 安装依赖
+
+```
+npm install
+```
+
+2. 运行 `server` 目录下的 `index.js`
+
+```
+node server/index.js
+```
+
+3. 打开 `src` 目录下面的 `index.html`（注意不要使用 `Live Server` 插件打开）
+
 ### 采坑记录：
 
 1. 使用文件形式直接在浏览器打开，不要使用 live server 插件。因为上传文件切片的时候，会创建临时文件夹并写入数据，live server 监听到项目中有文件写入，会强制浏览器刷新，然后取消请求，导致一些文件切片接收不到。
