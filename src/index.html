@@ -8,6 +8,7 @@
 	<title>Document</title>
 
 	<link rel="stylesheet" href="./index.css">
+	<script src="./request.js" defer></script>
 	<script src="./index.js" defer></script>
 </head>
 
@@ -15,7 +16,8 @@
 	<div id="root">
 		<input id="upload-input" type="file" onchange="changeUploadFile(this.files[0])">
 		<button onclick="upload()">upload</button>
-		<button onclick="pause()">Pause</button>
+		<button onclick="pauseUpload()">Pause</button>
+		<button onclick="resumeUpload()">Resume</button>
 	</div>
 
 </body>
