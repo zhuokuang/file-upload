@@ -116,4 +116,5 @@ function changeUploadFile(file) {
 
 function pause() {
   requestXhrsAndChunks.forEach((item) => item.xhr.abort());
+  // TODO: 持久化保存状态，防止浏览器刷新状态丢失
 }
