@@ -88,12 +88,12 @@ const merge = async (req, res) => {
 
   const writeStream = fse.createWriteStream(path.resolve(TARGETDIR, filename));
 
-  mergeStream(chunkPaths, writeStream);
+  mergeStream(chunkPaths, writeStream, () => {
+    // 合并文件后移除临时文件夹
+    fse.rmdirSync(TEMPDIR);
+  });
 
   console.log("finish merge");
-
-  // 合并文件后移除临时文件夹
-  // fse.rmdirSync(TEMPDIR);
 
   // 请求成功，响应数据
   res.end(
@@ -104,20 +104,22 @@ const merge = async (req, res) => {
   );
 };
 
-function mergeStream(chunks, writeStream) {
+function mergeStream(chunks, writeStream, onSuccess) {
   if (!chunks.length) {
     writeStream.end();
+    onSuccess?.();
     return;
   }
-  var currentChunk = chunks.shift();
-  readStream = fse.createReadStream(currentChunk);
+  var currentChunkPath = chunks.shift();
+  readStream = fse.createReadStream(currentChunkPath);
 
   // 默认配置值为true,此时读取器终止时默认终止写入器（可写流），故需要为false
   readStream.pipe(writeStream, { end: false });
 
   // 在当前可读流完毕时，执行递归
   readStream.on("end", () => {
-    mergeStream(chunks, writeStream);
+    fse.unlinkSync(currentChunkPath);
+    mergeStream(chunks, writeStream, onSuccess);
   });
 }
 
