@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.html",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server/index.js --port 3000 | npx http-server src/ --port 8080",
+    "watch": "node server/index.js --port 3000",
+    "server": "npx http-server src/ --port 8080"
   },
   "author": "kz",
   "license": "ISC",

@@ -36,7 +36,7 @@ function requestWithChunks(
       .map((formData) => ({ formData, cancel: null }));
 
     // 发送请求
-    send();
+    send(requestList);
 
     // 暴露取消请求的方法
     if (typeof cancelToken === "function") {
@@ -49,7 +49,7 @@ function requestWithChunks(
     }
 
     // 并行发送请求，上传文件切片
-    function send() {
+    function send(requestList) {
       requestList.map((item) =>
         request(url, {
           method,
@@ -72,7 +72,7 @@ function requestWithChunks(
     }
 
     async function resume() {
-      send();
+      send(requestList);
     }
 
     // 将文件划分为切片
