@@ -19,19 +19,6 @@ const getPostData = (req) => {
   });
 };
 
-const pipeStream = (path, writeStream) =>
-  new Promise((resolve) => {
-    const readStream = fse.createReadStream(path);
-
-    // 采坑记录：这里一直没走到 end 事件，也没有报错信息。
-    // 原来是目标文件夹不存在，所以不能直接写入
-    readStream.on("end", () => {
-      fse.unlinkSync(path);
-      resolve();
-    });
-    readStream.pipe(writeStream);
-  });
-
 const upload = (req, res) => {
   // 处理分片逻辑
   const multiparty = new Multiparty.Form();
@@ -79,9 +66,11 @@ const upload = (req, res) => {
 
 const merge = async (req, res) => {
   const data = await getPostData(req);
-  const { filename, size } = data;
+  const { filename } = data;
 
+  // 每个文件切片的名字
   const chunkNames = await fse.readdir(TEMPDIR);
+  // 需要为切片排序，因为是并发请求，可能前面的切片还没上传完，后面的切片就已经上传完了
   chunkNames.sort((a, b) => {
     const hashA = a.slice(a.lastIndexOf("-") + 1, a.lastIndexOf("."));
     const hashB = b.slice(b.lastIndexOf("-") + 1, b.lastIndexOf("."));
@@ -89,26 +78,22 @@ const merge = async (req, res) => {
   });
   console.log("chunkNames:", chunkNames);
 
+  // 每个文件切片的路径
+  const chunkPaths = chunkNames.map((name) => path.resolve(TEMPDIR, name));
+
+  // 如果不存在目标文件夹，则创建
   if (!fse.existsSync(TARGETDIR)) {
     await fse.mkdirs(TARGETDIR);
   }
 
-  await Promise.all(
-    chunkNames.map((chunkName, index) =>
-      pipeStream(
-        path.resolve(TEMPDIR, chunkName),
-        // 这里的文件夹必须要存在，否则走不到 readStream 的 end 事件，也不会报错
-        fse.createWriteStream(path.resolve(TARGETDIR, filename), {
-          start: size * index,
-        })
-      )
-    )
-  );
+  const writeStream = fse.createWriteStream(path.resolve(TARGETDIR, filename));
+
+  mergeStream(chunkPaths, writeStream);
 
   console.log("finish merge");
 
   // 合并文件后移除临时文件夹
-  fse.rmdirSync(TEMPDIR);
+  // fse.rmdirSync(TEMPDIR);
 
   // 请求成功，响应数据
   res.end(
@@ -118,6 +103,23 @@ const merge = async (req, res) => {
     })
   );
 };
+
+function mergeStream(chunks, writeStream) {
+  if (!chunks.length) {
+    writeStream.end();
+    return;
+  }
+  var currentChunk = chunks.shift();
+  readStream = fse.createReadStream(currentChunk);
+
+  // 默认配置值为true,此时读取器终止时默认终止写入器（可写流），故需要为false
+  readStream.pipe(writeStream, { end: false });
+
+  // 在当前可读流完毕时，执行递归
+  readStream.on("end", () => {
+    mergeStream(chunks, writeStream);
+  });
+}
 
 module.exports = {
   upload,

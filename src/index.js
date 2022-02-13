@@ -11,7 +11,7 @@ async function upload() {
   await requestWithChunks("http://localhost:3000/upload", {
     file: globalFile,
     cancelToken: (c) => (uploadCancel = c),
-    resumeToken: (c) => (uploadResume = c),
+    resumeToken: (r) => (uploadResume = r),
   });
 
   const data = {
