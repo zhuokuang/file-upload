@@ -71,7 +71,7 @@ function requestWithChunks(
       requestList.forEach((item) => item.cancel());
     }
 
-    async function resume() {
+    function resume() {
       send(requestList);
     }
 

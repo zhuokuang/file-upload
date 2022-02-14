@@ -76,7 +76,7 @@ function pause() {
 }
 ```
 
-为了防止在 request 函数中直接改变外部数组，以及解决 request 函数无法复用的问题，进行了如下优化。
+为了防止在 `request` 函数中直接改变外部数组，以及解决 `request` 函数无法复用的问题，进行了如下优化。
 
 ### 使用回调函数暴露 `xhr`
 
@@ -171,9 +171,9 @@ function pause() {
 }
 ```
 
-其实使用回调函数暴露出 `xhr` 还是有很多问题的。因为我们无法保证用户拿到 `xhr` 之后会干什么，。用户只是想要取消请求，而我们却把整个 `xhr` 暴露出来。这样，用户可能会用这些 `xhr` 去做其他事情，这是我们无法保证的。
+其实使用回调函数暴露出 `xhr` 还是有很多问题的。因为我们无法保证用户拿到 `xhr` 之后会干什么。用户只是想要取消请求，而我们却把整个 `xhr` 暴露出来。这样，用户可能会用这些 `xhr` 去做其他事情，这是我们无法保证的。
 
-最好的解决方法应该是：xhr 由内部保存，用户获取不到，我们只抛给用户一个取消请求的方法。
+最好的解决方法应该是：`xhr` 由内部保存，用户获取不到，我们只抛给用户一个取消请求的方法。
 
 ### 内部管理 `xhr`，并抛出取消请求的方法
 
@@ -457,7 +457,7 @@ async function upload() {
   await requestWithChunks("http://localhost:3000/upload", {
     file: globalFile,
     cancelToken: (c) => (uploadCancel = c),
-    resumeToken: (c) => (uploadResume = c),
+    resumeToken: (r) => (uploadResume = r),
   });
 
   const data = {
@@ -495,9 +495,9 @@ function resumeUpload() {
 
 ### 最后
 
-当然 `requestWithChunks` 还是有很多缺陷，比如：要取消请求和继续请求，需要外部传入回调函数，接收取消请求和继续请求的方法，这种实现还不是特别优雅。最好是能够直接返回取消请求和继续请求的方法。但是我们必须要返回一个 promise，在请求成功的时候才能及时通知外部，继续后面的操作。
+当然 `requestWithChunks` 还是有很多缺陷，比如：要取消请求和继续请求，需要外部传入回调函数，接收取消请求和继续请求的方法，这种实现还不是特别优雅。最好是能够直接返回取消请求和继续请求的方法。但是我们必须要返回一个 `promise`，在请求成功的时候才能及时通知外部，继续后面的操作。
 
-其实我们可以让 `requestWithChunks` 返回一个对象，对象中：包含了一个 promise，用来通知外部请求的状态；一个 cancel 函数，用来取消请求；一个 resume 函数，用来继续请求。
+其实我们可以让 `requestWithChunks` 返回一个对象，对象中：包含了一个 `promise`，用来通知外部请求的状态；一个 `cancel` 函数，用来取消请求；一个 `resume` 函数，用来继续请求。
 
 这样就可以优雅的接收取消请求和继续请求的方法了。但是吧，如果在请求成功之后，我们要做一些操作，就得这样：
 
@@ -507,6 +507,6 @@ requestWithChunks(url, options).promise.then((res) => {
 });
 ```
 
-多了一个 promise。。。
+多了一个 `promise`。。。
 
 如果不是经常取消请求，总是要在 then 方法前面加上一个 promise，就感觉有点怪。

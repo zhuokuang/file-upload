@@ -19,6 +19,7 @@ const getPostData = (req) => {
   });
 };
 
+// 监听上传请求
 const upload = (req, res) => {
   // 处理分片逻辑
   const multiparty = new Multiparty.Form();
@@ -32,15 +33,15 @@ const upload = (req, res) => {
     }
     // 文件分片
     const [chunk] = files.chunk;
-    // 切片哈希，这里为了方便设置为索引
+    // 切片哈希，这里为了方便前面将其设置为索引
     const [hash] = fields.hash;
     // 文件名
     const [filename] = fields.name;
     // 扩展名
     const ext = filename.split(".").pop();
 
-    console.log("hash:", hash);
-    console.log("size:", chunk.size);
+    // console.log("hash:", hash);
+    // console.log("size:", chunk.size);
 
     // 目录不存在在创建目录
     if (!fse.existsSync(TEMPDIR)) {
@@ -64,9 +65,9 @@ const upload = (req, res) => {
   });
 };
 
+// 监听合并文件请求
 const merge = async (req, res) => {
-  const data = await getPostData(req);
-  const { filename } = data;
+  const { filename } = await getPostData(req);
 
   // 每个文件切片的名字
   const chunkNames = await fse.readdir(TEMPDIR);
@@ -76,7 +77,7 @@ const merge = async (req, res) => {
     const hashB = b.slice(b.lastIndexOf("-") + 1, b.lastIndexOf("."));
     return hashA - hashB;
   });
-  console.log("chunkNames:", chunkNames);
+  // console.log("chunkNames:", chunkNames);
 
   // 每个文件切片的路径
   const chunkPaths = chunkNames.map((name) => path.resolve(TEMPDIR, name));
@@ -93,6 +94,7 @@ const merge = async (req, res) => {
     fse.rmdirSync(TEMPDIR);
   });
 
+  // 合并文件切片
   mergeStream(chunkPaths, writeStream);
 
   console.log("finish merge");

@@ -27,12 +27,14 @@ async function upload() {
   });
 
   // 上传成功之后，清空 input 框
-  resetInput();
+  resetInput("upload-input");
+
+  alert("upload file success");
 }
 
 // 清空 input 框
-function resetInput() {
-  const input = document.getElementById("upload-input");
+function resetInput(inputId) {
+  const input = document.getElementById(inputId);
   input.value = "";
 }
 
