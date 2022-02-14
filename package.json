@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.html",
   "scripts": {
-    "start": "node server/index.js --port 3000 | npx http-server src/ --port 8080",
-    "watch": "node server/index.js --port 3000",
-    "server": "npx http-server src/ --port 8080"
+    "start": "npm run server | npm run http-server",
+    "server": "node server/index.js --port 3000",
+    "http-server": "npx http-server src/ --port 8080"
   },
   "author": "kz",
   "license": "ISC",

@@ -88,10 +88,12 @@ const merge = async (req, res) => {
 
   const writeStream = fse.createWriteStream(path.resolve(TARGETDIR, filename));
 
-  mergeStream(chunkPaths, writeStream, () => {
+  writeStream.on("finish", () => {
     // 合并文件后移除临时文件夹
     fse.rmdirSync(TEMPDIR);
   });
+
+  mergeStream(chunkPaths, writeStream);
 
   console.log("finish merge");
 
@@ -104,10 +106,9 @@ const merge = async (req, res) => {
   );
 };
 
-function mergeStream(chunks, writeStream, onSuccess) {
+function mergeStream(chunks, writeStream) {
   if (!chunks.length) {
     writeStream.end();
-    onSuccess?.();
     return;
   }
   var currentChunkPath = chunks.shift();
@@ -119,7 +120,7 @@ function mergeStream(chunks, writeStream, onSuccess) {
   // 在当前可读流完毕时，执行递归
   readStream.on("end", () => {
     fse.unlinkSync(currentChunkPath);
-    mergeStream(chunks, writeStream, onSuccess);
+    mergeStream(chunks, writeStream);
   });
 }
 
